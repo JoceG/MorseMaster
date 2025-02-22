@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
+#include "MorseCode.h"
 
 #define GREEN_BUTTON 33
 #define RED_BUTTON 32
@@ -8,10 +9,11 @@
 
 TFT_eSPI tft = TFT_eSPI(); // Create TFT instance
 
-unsigned long previousMillis = 0;
-const long interval = 1000; // Time interval to check every 1000ms
+void setup() {
+  Serial.begin(115200);
+  delay(100); // Ensure Serial is ready before printing
 
-void setup() {  
+  Serial.println("Enter a message to convert to Morse code:");  
   tft.init();                 
   tft.fillScreen(TFT_BLACK);  
   tft.setTextColor(TFT_WHITE, TFT_BLACK);  
@@ -23,30 +25,32 @@ void setup() {
   pinMode(RED_BUTTON, INPUT_PULLUP);
   pinMode(BUZZER, OUTPUT);
   pinMode(LED, OUTPUT);
-
-  Serial.begin(115200);
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
+  if (Serial.available() > 0) {  // Check if data is available in Serial buffer
+    String message = "";
 
-  // Check if 1000ms have passed
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis; // Reset the previous time to now
+    // Keep reading until we get a newline (Enter key)
+    while (true) {
+      if (Serial.available() > 0) {
+          char receivedChar = Serial.read(); // Read one character
+          if (receivedChar == '\n') break; // Stop when Enter is pressed
+          message += receivedChar; // Append to message
+      }
+    }
 
-    int greenButtonState = digitalRead(GREEN_BUTTON); // Pressed = LOW, Released = HIGH
-    int redButtonState = digitalRead(RED_BUTTON); // Pressed = LOW, Released = HIGH
+    message.trim(); // Remove accidental spaces/newlines
 
-    if (greenButtonState == LOW) {
-      digitalWrite(LED, HIGH);
-      tone(BUZZER, 2000);
+    if (message.length() > 0) { // Ensure valid input
+        String morseCode = encodeToMorse(message);
+        if (morseCode != "") {
+            Serial.println("Morse Code: " + morseCode);      
+        }
     } else {
-      digitalWrite(LED, LOW);
-      noTone(BUZZER);
+        Serial.println("Error: Empty input received.");
     }
 
-    if (redButtonState == LOW) {
-      Serial.println("Red button is pressed");
-    }
+    Serial.println("\nEnter a message to convert to Morse code:");
   }
 }
