@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include <AUnit.h>
 #include <TFT_eSPI.h>
-#include "MorseCode.h"
+#include "morse_translator.h"  
+#include "../test/test_morse_translator.cpp"
 
 #define GREEN_BUTTON 33
 #define RED_BUTTON 32
@@ -8,12 +10,14 @@
 #define LED 26
 
 TFT_eSPI tft = TFT_eSPI(); // Create TFT instance
+bool first_loop = true;
+unsigned long startMillis = millis();
 
 void setup() {
+  startMillis = millis();
   Serial.begin(115200);
-  delay(100); // Ensure Serial is ready before printing
+  while (!Serial);  // Wait for Serial Monitor to connect
 
-  Serial.println("Enter a message to convert to Morse code:");  
   tft.init();                 
   tft.fillScreen(TFT_BLACK);  
   tft.setTextColor(TFT_WHITE, TFT_BLACK);  
@@ -28,29 +32,38 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {  // Check if data is available in Serial buffer
-    String message = "";
+  aunit::TestRunner::run(); // Run all tests
 
-    // Keep reading until we get a newline (Enter key)
-    while (true) {
-      if (Serial.available() > 0) {
+  if (millis() - startMillis > 1000) {
+    if (first_loop) {
+      Serial.println("Enter a message to convert to Morse code:");  
+      first_loop = false;
+    }
+
+    if (Serial.available() > 0) {  // Check if data is available in Serial buffer
+      String message = "";
+  
+      // Keep reading until we get a newline (Enter key)
+      while (true) {
+        if (Serial.available() > 0) {
           char receivedChar = Serial.read(); // Read one character
           if (receivedChar == '\n') break; // Stop when Enter is pressed
           message += receivedChar; // Append to message
+        }
       }
-    }
-
-    message.trim(); // Remove accidental spaces/newlines
-
-    if (message.length() > 0) { // Ensure valid input
+  
+      message.trim(); // Remove accidental spaces/newlines
+  
+      if (message.length() > 0) { // Ensure valid input
         String morseCode = encodeToMorse(message);
         if (morseCode != "") {
-            Serial.println("Morse Code: " + morseCode);      
+          Serial.println("Morse Code: " + morseCode);      
         }
-    } else {
+      } else {
         Serial.println("Error: Empty input received.");
+      }
+  
+      Serial.println("\nEnter a message to convert to Morse code:");
     }
-
-    Serial.println("\nEnter a message to convert to Morse code:");
-  }
+  } 
 }

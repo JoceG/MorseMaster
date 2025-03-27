@@ -1,5 +1,5 @@
-#ifndef MORSE_CODE_H
-#define MORSE_CODE_H
+#ifndef MORSE_TRANSLATOR_H
+#define MORSE_TRANSLATOR_H
 
 #include <Arduino.h>
 #include <unordered_map>

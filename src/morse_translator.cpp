@@ -1,5 +1,4 @@
-// MorseCode.cpp
-#include "MorseCode.h"
+#include "morse_translator.h"
 
 std::unordered_map<char, String> MORSE_CODE_DICT = {
   {'A', ".-"}, {'B', "-..."}, {'C', "-.-."}, {'D', "-.."},
@@ -16,19 +15,22 @@ std::unordered_map<char, String> MORSE_CODE_DICT = {
 // Function to encode message to Morse code
 String encodeToMorse(String message) {
   String cipher = "";
+  message.trim(); // Remove accidental spaces/newlines
 
-  for (char character : message) {
+  for (char character : message) {  
     if (character != ' ') {
       // Handle both uppercase and lowercase
       if (MORSE_CODE_DICT.find(toupper(character)) != MORSE_CODE_DICT.end()) {
         cipher += MORSE_CODE_DICT[toupper(character)] + ' '; // Add Morse code and space
       } else {
         // Print error message if character is not found
-        Serial.println("Error: Unable to convert the following character to Morse code: " + String(character));
-        return ""; // Return an empty string to indicate failure
+        Serial.println("Warning: Unsupported character " + String(character) + " ignored.");
       }
     } else {
-      cipher += "  "; // Double space for word separation
+      // Check if the last two characters are not already spaces
+      if (cipher.length() >= 2 && (cipher[cipher.length() - 2] != ' ' || cipher[cipher.length() - 1] != ' ')){
+        cipher += "  "; // Double space for word separation
+      }
     }
   }
 
