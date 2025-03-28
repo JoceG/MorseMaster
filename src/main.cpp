@@ -2,6 +2,7 @@
 #include <AUnit.h>
 #include <TFT_eSPI.h>
 #include "morse_translator.h"  
+#include "morse_player.h"  
 #include "../test/test_morse_translator.cpp"
 
 #define GREEN_BUTTON 33
@@ -12,6 +13,7 @@
 TFT_eSPI tft = TFT_eSPI(); // Create TFT instance
 bool first_loop = true;
 unsigned long startMillis = millis();
+int timeUnit = 100;
 
 void setup() {
   startMillis = millis();
@@ -57,7 +59,8 @@ void loop() {
       if (message.length() > 0) { // Ensure valid input
         String morseCode = encodeToMorse(message);
         if (morseCode != "") {
-          Serial.println("Morse Code: " + morseCode);      
+          Serial.println("Morse Code: " + morseCode);
+          playMorseCode(morseCode, BUZZER, LED, timeUnit);
         }
       } else {
         Serial.println("Error: Empty input received.");
