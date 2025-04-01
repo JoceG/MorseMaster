@@ -5,10 +5,10 @@
 #include "morse_player.h"  
 #include "../test/test_morse_translator.cpp"
 
-#define GREEN_BUTTON 33
-#define RED_BUTTON 32
-#define BUZZER 25
-#define LED 26
+const int GREEN_BUTTON = 33;
+const int RED_BUTTON = 32;
+const int BUZZER = 25;
+const int LED = 26;
 
 TFT_eSPI tft = TFT_eSPI(); // Create TFT instance
 bool first_loop = true;
